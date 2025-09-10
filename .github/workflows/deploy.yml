@@ -1,0 +1,38 @@
+name: Deploy Dockerized Node.js Service
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/node-secret-service:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/node-secret-service:latest
+
+      - name: Deploy to remote server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-secret-service:latest
+            docker stop node-secret-service || true
+            docker rm node-secret-service || true
+            echo "USERNAME=${{ secrets.USERNAME }}" > .env
+            echo "PASSWORD=${{ secrets.PASSWORD }}" >> .env
+            echo "SECRET_MESSAGE=${{ secrets.SECRET_MESSAGE }}" >> .env
+            docker run -d --env-file .env -p 3000:3000 --name node-secret-service ${{ secrets.DOCKERHUB_USERNAME }}/node-secret-service:latest
