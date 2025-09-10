@@ -28,7 +28,7 @@ function basicAuth(req, res, next) {
   return res.status(401).send('Invalid credentials.');
 }
 
-app.get('/', (req, res) => res.send('Hello, world!'));
+app.get('/', (req, res) => res.send('Hello, world! hanan'));
 app.get('/secret', basicAuth, (req, res) => res.send(SECRET_MESSAGE));
 
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
