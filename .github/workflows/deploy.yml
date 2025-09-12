@@ -29,10 +29,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-secret-service:latest
-            docker stop node-secret-service || true
-            docker rm node-secret-service || true
+            sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/node-secret-service:latest
+            sudo docker stop node-secret-service || true
+            sudo docker rm node-secret-service || true
             echo "USERNAME=${{ secrets.USERNAME }}" > .env
             echo "PASSWORD=${{ secrets.PASSWORD }}" >> .env
             echo "SECRET_MESSAGE=${{ secrets.SECRET_MESSAGE }}" >> .env
-            docker run -d --env-file .env -p 3000:3000 --name node-secret-service ${{ secrets.DOCKERHUB_USERNAME }}/node-secret-service:latest
+            sudo docker run -d --env-file .env -p 3000:3000 --name node-secret-service ${{ secrets.DOCKERHUB_USERNAME }}/node-secret-service:latest
